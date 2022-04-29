@@ -386,11 +386,11 @@
 	},
 	"sources": {
 		".deps/npm/@openzeppelin/contracts/token/ERC1155/ERC1155.sol": {
-			"keccak256": "0x030b001710abf92bea8a1ae6e0eccb4fc4ba6ff639e6299b989ef27725d968cf",
+			"keccak256": "0x17a964fd502666bd1fd49ff43da4a475872e640add790598db6aec18b286e3da",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://043eb7074bae567cf2fdcf3ed739312d444c654730ac061c61e85ab5be1c0531",
-				"dweb:/ipfs/QmQLimjLxfFH1mUxAN2g6skvm3UiTzH3RA7tUMNdEjEGTF"
+				"bzz-raw://62978dd68b74223e3b5668844cdd784866d8172c0fb45dbd60a9359d99695a4d",
+				"dweb:/ipfs/QmZCamiPWNg4n6TYwBmsCTf6riduCoF3kSaEStTCroZcS4"
 			]
 		},
 		".deps/npm/@openzeppelin/contracts/token/ERC1155/IERC1155.sol": {

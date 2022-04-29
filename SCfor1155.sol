@@ -7,11 +7,18 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract KRISNA1155 is ERC1155, AccessControl, Pausable, ERC1155Burnable, ERC1155Supply {
+contract KEPENG1155 is ERC1155, AccessControl, Pausable, ERC1155Burnable, ERC1155Supply {
     bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+    using Counters for Counters.Counter;  
+    using Strings for uint256;  
+    Counters.Counter private _tokenIdCounter;
+    mapping(uint256 => address) private _owners;
+    mapping(uint256 => string) private _tokenURIs;
 
     constructor() ERC1155("") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -32,18 +39,39 @@ contract KRISNA1155 is ERC1155, AccessControl, Pausable, ERC1155Burnable, ERC115
         _unpause();
     }
 
-    function mint(address account, uint256 id, uint256 amount, bytes memory data)
+    event MintedId(uint id);
+
+    function mint(address account, uint256 amount, /* string memory uri,*/ bytes memory data)
         public
-        onlyRole(MINTER_ROLE)
+        //onlyRole(MINTER_ROLE)
     {
-        _mint(account, id, amount, data);
+        require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role to mint");
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _mint(account, tokenId, amount, data);
+        _owners[tokenId] = account;
+        //_setTokenURI(tokenId, uri);
+        emit MintedId(tokenId);
+        
     }
 
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
-        public
-        onlyRole(MINTER_ROLE)
+    function mintBatch(address to, uint256 countOfNFTs, uint256[] memory amounts, /* string[] memory uri,*/ bytes memory data)
+        public returns (uint256[] memory)
+        //onlyRole(MINTER_ROLE)
     {
+        require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role to mint");
+
+        uint256[] memory ids = new uint[](countOfNFTs);
+        for (uint256 i = 0; i < countOfNFTs; i++) {
+            uint256 tokenId = _tokenIdCounter.current();
+            _tokenIdCounter.increment();
+            ids[i] = tokenId;
+            _owners[tokenId] = to;
+            //_setTokenURI(tokenId, uri[i]);
+        }
+        
         _mintBatch(to, ids, amounts, data);
+        return ids;
     }
 
     function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
@@ -64,16 +92,47 @@ contract KRISNA1155 is ERC1155, AccessControl, Pausable, ERC1155Burnable, ERC115
     {
         return super.supportsInterface(interfaceId);
     }
-    
-    // function uri(uint256 _tokenId) public view virtual override returns (string memory) {
-    //     //return "https://nftmetadata.letskuy.com/test.json";'
-    //     return string(
-    //         abi.encodePacked(
-    //            "https://nftmetadata.letskuy.com/",
-    //            Strings.toString(_tokenId),
-    //            ".json"
-    //         )
-    //     );
+
+    // ================================ CUSTOME URI ================================
+    //==============================================================================
+
+    // function _exists(uint256 tokenId) internal view virtual returns (bool) {
+    //     return _owners[tokenId] != address(0);
     // }
+
+    // function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual {
+    //     require(_exists(tokenId), "URI Storage: URI set of nonexistent token");
+    //     _tokenURIs[tokenId] = _tokenURI;
+    //      emit URI(_tokenURI, tokenId);
+    // }
+
+    // function setTokenURI(uint256 tokenId, string memory URI) public virtual{
+    //     require(hasRole(URI_SETTER_ROLE, _msgSender()), "Must have URI setter role to mint");
+    //     _setTokenURI(tokenId, URI);
+    // }
+
+    //function tokenURI(uint256 tokenId) public view virtual returns (string memory) {
+        //require(_exists(tokenId), "URI Storage: URI query for nonexistent token");
+
+        //string memory _tokenURI = _tokenURIs[tokenId];
+        //string memory base = _baseURI();
+
+        // If there is no base URI, return the token URI.
+        // if (bytes(base).length == 0) {
+        //     return _tokenURI;
+        // }
+
+        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
+        // if (bytes(_tokenURI).length > 0) {
+        //     return string(abi.encodePacked(base, _tokenURI));
+        // }
+
+        //return super.tokenURI(tokenId);
+        //return _tokenURI;
+    //}
+
+    function getCurrentTokenId() public view virtual returns (uint256){
+        return _tokenIdCounter.current();
+    }
 
 }

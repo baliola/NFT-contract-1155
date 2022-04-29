@@ -59,6 +59,12 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
      */
     function uri(uint256 _tokenId) public view virtual override returns (string memory) {
         //return _uri;
+        
+        /**
+        * Commented because new dynamic URI setter on main contract. 
+        * if want to reuse this function, remember to add parameter uint256 _tokenId 
+        */
+
         return string(
             abi.encodePacked(
                _uri,
